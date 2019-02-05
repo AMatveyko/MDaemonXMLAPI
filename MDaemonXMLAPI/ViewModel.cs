@@ -27,6 +27,11 @@ namespace MDaemonXMLAPI
 
         #region View
 
+
+        /// <summary>
+        /// new string
+        /// </summary>
+
         public PasswordBox PasswordBox { get; set; }
 
 
