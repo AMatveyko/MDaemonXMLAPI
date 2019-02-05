@@ -1,0 +1,322 @@
+﻿<Window x:Class="MDaemonXMLAPI.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:MDaemonXMLAPI"
+        mc:Ignorable="d"
+        Title="MDaemonXMLAPI - Создание пользователей" Height="600" Width="1040" MinHeight="600" MinWidth="1040">
+    <Window.DataContext>
+        <local:ViewModel/>
+    </Window.DataContext>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="25"/>
+        </Grid.RowDefinitions>
+        <ToolBar Grid.ColumnSpan="3">
+            <Button Content="Прочитать из файла"/>
+            <Separator/>
+            <Button Content="Записать в файл" Command="{Binding Path=WriteNewMailBoxToFileCmd}"/>
+            <Separator/>
+            <TextBlock VerticalAlignment="Center" Text=" Почтовый сервер: "/>
+            <Border>
+                <TextBox VerticalAlignment="Center" Width="90" Text="{Binding Path=MailServer}"/>
+            </Border>
+            <TextBlock VerticalAlignment="Center" Text=" Имя пользователя: "/>
+            <Border>
+                <TextBox VerticalAlignment="Center" Width="170" Text="{Binding Path=UserNameForMailServer}"/>
+            </Border>
+            <TextBlock VerticalAlignment="Center" Text=" Пароль: "/>
+            <Border>
+                <PasswordBox Name="pswdBx" VerticalAlignment="Center" Width="100" Password="19860809"/>
+            </Border>
+            <Separator/>
+            <Button Margin="2" VerticalAlignment="Bottom"
+                                        Content="Опросить сервер" 
+                                        Command="{Binding Path=CheckLoginCmd}"
+                                        CommandParameter="{Binding ElementName=pswdBx}"/>
+        </ToolBar>
+        <TabControl Grid.Row="1">
+            <TabItem Header="Создание пользователей">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="4*"/>
+                        <ColumnDefinition Width="5"/>
+                        <ColumnDefinition Width="260"/>
+                    </Grid.ColumnDefinitions>
+                    <ListBox Name="LBNewMail" Grid.Column="0" ItemsSource="{Binding Path=NewMails}">
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem">
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Margin="1" Background="{Binding Path=Color}" Name="GridItem" IsEnabled="{Binding Path=IsEdit}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition/>
+                                        <ColumnDefinition/>
+                                        <ColumnDefinition/>
+                                        <ColumnDefinition/>
+                                        <ColumnDefinition/>
+                                        <ColumnDefinition/>
+                                        <ColumnDefinition Width="auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="0">
+                                        <TextBlock Margin="1" Text="Имя ящика:"/>
+                                        <TextBox Margin="3" Text="{Binding Path=Name}" MinWidth="120" TextWrapping="WrapWithOverflow" Background="White"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="1">
+                                        <TextBlock Margin="1" Text="Домен:"/>
+                                        <ComboBox Margin="3" ItemsSource="{Binding ElementName=CBDomains, Path=ItemsSource}" SelectedItem="{Binding Path=Domain}" MinWidth="120"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="2">
+                                        <TextBlock Margin="1" Text="Пароль:"/>
+                                        <TextBox Margin="3" Text="{Binding Path=Password}" MinWidth="120" Background="White"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="3">
+                                        <TextBlock Margin="1" Text="Имя:"/>
+                                        <TextBox Margin="3" Text="{Binding Path=FirstName}" MinWidth="120" Background="White"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="4">
+                                        <TextBlock Margin="1" Text="Фамилия:"/>
+                                        <TextBox Margin="3" Text="{Binding Path=LastName}" MinWidth="120" HorizontalAlignment="Stretch" Background="White"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="5">
+                                        <TextBlock Margin="1" Text="Описание:"/>
+                                        <TextBox Margin="3" Text="{Binding Path=Descriptions}" MinWidth="120" HorizontalAlignment="Stretch" Background="White"/>
+                                    </StackPanel>
+                                    <Button Grid.Column="6" Margin="3" Content="Удалить" HorizontalAlignment="Right"
+                                        Command="{Binding Path=DataContext.RemoveItemCmd, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                        CommandParameter="{Binding ElementName=GridItem, Path=DataContext}"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                    <GridSplitter Grid.Column="1" Width="5" IsEnabled="False"/>
+                    <Grid Grid.Column="2">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <GroupBox Header="Добавить пользователя">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="auto"/>
+                                    <RowDefinition Height="auto"/>
+                                    <RowDefinition Height="auto"/>
+                                    <RowDefinition Height="auto"/>
+                                </Grid.RowDefinitions>
+                                <Grid Grid.Row="0" Margin="2,2,2,0" IsEnabled="{Binding Path=IsEnabledCreateUsers}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock VerticalAlignment="Center" Text="Домен:"/>
+                                    <ComboBox Margin="2,2,2,0" Grid.Column="1" Width="165"
+                                       ItemsSource="{Binding Path=DomainList}"
+                                       SelectedItem="{Binding Path=SelectedDomain}"/>
+                                </Grid>
+                                <Grid Margin="2,2,2,0" Grid.Row="1" IsEnabled="{Binding Path=IsEnabledCreateUsers}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="Имя пользователя:"/>
+                                    <TextBox HorizontalAlignment="Right" Grid.Column="1" Width="100" Text="{Binding Path=CreateNewUserName}"/>
+                                </Grid>
+                                <Grid Margin="2,2,2,0" Grid.Row="2" IsEnabled="{Binding Path=IsEnabledCreateUsers}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="Длина пароля:"/>
+                                    <TextBox HorizontalAlignment="Right" Grid.Column="1" Width="100" Text="{Binding Path=CreateNewPasswordLength}"/>
+                                </Grid>
+                                <Grid Margin="2,2,2,0" Grid.Row="3" IsEnabled="{Binding Path=IsEnabledCreateUsers}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Button Grid.Column="1" Width="100" HorizontalAlignment="Right" Margin="1" Content="Добавить"
+                                        Command="{Binding Path=AddNewBoxCmd}" />
+                                </Grid>
+                            </Grid>
+                        </GroupBox>
+                        <GroupBox Grid.Row="1" Header="Генерировать пользователей">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="auto"/>
+                                    <RowDefinition Height="auto"/>
+                                    <RowDefinition Height="auto"/>
+                                    <RowDefinition Height="auto"/>
+                                    <RowDefinition Height="auto"/>
+                                    <RowDefinition Height="auto"/>
+                                    <RowDefinition Height="auto"/>
+                                    <RowDefinition Height="auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+                                <Grid Grid.Row="0" Margin="2,2,2,0" IsEnabled="{Binding Path=IsEnabledCreateUsers}">
+
+                                </Grid>
+                                <Grid Grid.Row="1" Margin="2,2,2,0" IsEnabled="{Binding Path=IsEnabledCreateUsers}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock VerticalAlignment="Center" Text="Домен:"/>
+                                    <ComboBox Name="CBDomains" Margin="2,2,2,0" Grid.Column="1" Width="165"
+                                       ItemsSource="{Binding Path=DomainList}"
+                                       SelectedItem="{Binding Path=SelectedDomain}"/>
+                                </Grid>
+                                <Grid Margin="2,2,2,0" Grid.Row="2" IsEnabled="{Binding Path=IsEnabledCreateUsers}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="Количество:"/>
+                                    <TextBox HorizontalAlignment="Right" Grid.Column="1" Width="100" Text="{Binding Path=MailBoxesCount}"/>
+                                </Grid>
+                                <Grid Margin="2,2,2,0" Grid.Row="3" IsEnabled="{Binding Path=IsEnabledCreateUsers}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="76"/>
+                                        <ColumnDefinition Width="24"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="Шаблон:"/>
+                                    <TextBox HorizontalAlignment="Right" Grid.Column="1" Width="100" Text="{Binding Path=UserNameTemplate}" Grid.ColumnSpan="2"/>
+                                </Grid>
+                                <Grid Margin="2,2,2,0" Grid.Row="4" IsEnabled="{Binding Path=IsEnabledCreateUsers}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="76"/>
+                                        <ColumnDefinition Width="24"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="Длина пароля:"/>
+                                    <TextBox HorizontalAlignment="Right" Grid.Column="1" Width="100" Text="{Binding Path=PasswordLength}" Grid.ColumnSpan="2"/>
+                                </Grid>
+                                <Grid Margin="2,2,2,0" Grid.Row="5" IsEnabled="{Binding Path=IsEnabledCreateUsers}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="56"/>
+                                        <ColumnDefinition Width="20"/>
+                                        <ColumnDefinition Width="24"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="Спецсимволы:"/>
+                                    <CheckBox Grid.Column="1" Grid.ColumnSpan="2" IsChecked="{Binding Path=SpecSimvoly}"/>
+                                </Grid>
+                                <Grid Margin="2,2,2,0" Grid.Row="6" IsEnabled="{Binding Path=IsEnabledCreateUsers}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Button Grid.Column="1" Width="100" HorizontalAlignment="Right" Margin="1" Content="Генерировать"
+                                        Command="{Binding Path=GenNewBoxesCmd}" />
+                                </Grid>
+                                <Grid Margin="2,2,2,0" Grid.Row="7" IsEnabled="{Binding Path=IsEnabledCreateUsers}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="auto"/>
+                                    </Grid.ColumnDefinitions>
+                                </Grid>
+                            </Grid>
+                        </GroupBox>
+                        <StackPanel Grid.Row="2">
+                            <Button Command="{Binding Path=ClearListCmd}" Margin="1" Content="Очистить"/>
+                            <Button Content="Создать пользователей на сервере" Margin="1"
+                                            Command="{Binding Path=WriteListOnServerCmd}"
+                                            CommandParameter="{Binding ElementName=pswdBx}"/>
+                        </StackPanel>
+                        <TextBox Grid.Row="4" Text="{Binding Path=Log}" IsReadOnly="True" Margin="1"/>
+                    </Grid>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Информация о пользователях">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="55"/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" MinWidth="100"/>
+                        <ColumnDefinition Width="5" MinWidth="5" MaxWidth="5"/>
+                        <ColumnDefinition Width="*" MinWidth="100"/>
+                    </Grid.ColumnDefinitions>
+                    <GroupBox Header="Фильтр" Grid.ColumnSpan="3" Margin="2">
+                        <StackPanel Orientation="Horizontal" Margin="2">
+                            <TextBlock Text=" * " VerticalAlignment="Bottom"/>
+                            <TextBox Width="200" Text="{Binding Path=FilterNameAllMailBox, UpdateSourceTrigger=PropertyChanged}"/>
+                            <TextBlock Text=" *@ " VerticalAlignment="Bottom"/>
+                            <ComboBox Width="200" ItemsSource="{Binding Path=DomainListInfoUsers}"
+                                                  SelectedItem="{Binding Path=SelectedDomainInfoUser}"/>
+                        </StackPanel>
+                    </GroupBox>
+                    <GroupBox Grid.Row="1" Grid.Column="0" Header="Почтовые ящики">
+                        <ListBox BorderThickness="0" ItemsSource="{Binding Path=FilteredAllMailBox}"
+                                                      SelectedItem="{Binding Path=SelectedMailBox}">
+                            <ListBox.ItemContainerStyle>
+                                <Style TargetType="ListBoxItem">
+                                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                </Style>
+                            </ListBox.ItemContainerStyle>
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal" Background="LightGray">
+                                        <TextBlock Margin="4,1,0,1" Text="{Binding Path=Name}" FontWeight="Bold" FontSize="16"/>
+                                        <TextBlock Text="@"  FontWeight="Bold"  FontSize="16"/>
+                                        <TextBlock Text="{Binding Path=Domain}"  FontWeight="Bold"  FontSize="16"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </GroupBox>
+                    <GroupBox Grid.Row="1" Grid.Column="2" Header="{Binding Path=Email}" DataContext="{Binding Path=SelectedMailBox}" FontWeight="Bold" FontSize="16">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="auto"/>
+                                <ColumnDefinition Width="200"/>
+                                <ColumnDefinition/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="30"/>
+                                <RowDefinition Height="30"/>
+                                <RowDefinition Height="30"/>
+                                <RowDefinition Height="30"/>
+                                <RowDefinition Height="30"/>
+                                <RowDefinition Height="30"/>
+                                <RowDefinition Height="30"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Text="Имя:"/>
+                            <TextBox Grid.Column="1" Text="{Binding FirstName}" BorderThickness="0"
+                                     IsReadOnly="{Binding DataContext.IsReadUserInfo, RelativeSource={RelativeSource AncestorType=ItemsControl}}"/>
+                            <TextBlock Grid.Row="1" Text="Фамилия:"/>
+                            <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding LastName}" BorderThickness="0"
+                                     IsReadOnly="{Binding DataContext.IsReadUserInfo, RelativeSource={RelativeSource AncestorType=ItemsControl}}"/>
+                            <TextBlock Grid.Row="2" Text="Пароль:"/>
+                            <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Password}" BorderThickness="0"
+                                     IsReadOnly="{Binding DataContext.IsReadUserInfo, RelativeSource={RelativeSource AncestorType=ItemsControl}}"/>
+                            <TextBlock Grid.Row="3" Text="Заморожен:"/>
+                            <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Frozen}" BorderThickness="0"
+                                     IsReadOnly="{Binding DataContext.IsReadUserInfo, RelativeSource={RelativeSource AncestorType=ItemsControl}}"/>
+                            <TextBlock Grid.Row="4" Text="Выключен:"/>
+                            <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding Disabled}" BorderThickness="0"
+                                     IsReadOnly="{Binding DataContext.IsReadUserInfo, RelativeSource={RelativeSource AncestorType=ItemsControl}}"/>
+                            <TextBlock Grid.Row="5" Text="Директория:"/>
+                            <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding MailDir}" Grid.ColumnSpan="2" BorderThickness="0"
+                                     IsReadOnly="{Binding DataContext.IsReadUserInfo, RelativeSource={RelativeSource AncestorType=ItemsControl}}"/>
+                            <TextBlock Grid.Row="6" Text="Описание:"/>
+                            <TextBox Grid.Row="6" Grid.Column="1" Text="{Binding Descriptions}" Grid.ColumnSpan="2" BorderThickness="0"
+                                     IsReadOnly="{Binding DataContext.IsReadUserInfo, RelativeSource={RelativeSource AncestorType=ItemsControl}}"/>
+                        </Grid>
+                    </GroupBox>
+                </Grid>
+            </TabItem>
+        </TabControl>
+        <StatusBar Grid.Row="2">
+        </StatusBar>
+    </Grid>
+</Window>
