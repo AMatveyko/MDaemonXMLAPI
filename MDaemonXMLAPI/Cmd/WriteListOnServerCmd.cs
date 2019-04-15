@@ -57,6 +57,21 @@ namespace MDaemonXMLAPI.Cmd
             });
         }
 
+        private string Convert(string str)
+        {
+            Encoding utf8 = Encoding.GetEncoding("UTF-8");
+            Encoding win1251 = Encoding.GetEncoding("Windows-1251");
+            byte[] win1251Bytes = utf8.GetBytes(str);
+            byte[] utf8Bytes = Encoding.Convert(win1251, utf8, win1251Bytes);
+            return utf8.GetString(utf8Bytes);
+
+            //Encoding utf8 = Encoding.GetEncoding("UTF-8");
+            //Encoding win1251 = Encoding.GetEncoding("Windows-1251");
+            //byte[] utf8Bytes = win1251.GetBytes(str);
+            //byte[] win1251Bytes = Encoding.Convert(utf8, win1251, utf8Bytes);
+            //return win1251.GetString(win1251Bytes);
+        }
+
         public override bool CanExecute(object parameter)
         {
             return ( (_viewModel.NewMails?.Count > 0) && (_canExecute) );

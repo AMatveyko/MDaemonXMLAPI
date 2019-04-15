@@ -15,7 +15,8 @@ namespace MDaemonXMLAPI.Model
             GetUserInfo,
             GetDomainList,
             CreateUser,
-            GetDomainInfo
+            GetDomainInfo,
+            UpdateUser
         }
 
         protected enum _xmlElement

@@ -1,0 +1,152 @@
+﻿<UserControl x:Class="MDaemonXMLAPI.UserControls.UserControls.LogAnalyzer.LogAnalyzerControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:MDaemonXMLAPI.UserControls.LogAnalyzer"
+             xmlns:converters="clr-namespace:MDaemonXMLAPI.UserControls.LogAnalyzer.Converters"
+             xmlns:myControl="clr-namespace:MDaemonXMLAPI.MyProps"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.DataContext>
+        <local:VMLogAnalyzer/>
+    </UserControl.DataContext>
+    <UserControl.Resources>
+        <converters:DataTimeConverter x:Key="DTConv"/>
+        <converters:TranslateConverter x:Key="Transl"/>
+        <converters:StatusToColorConverter x:Key="StatusToColor"/>
+        <converters:FileNameConverter x:Key="FileNameConverter"/>
+    </UserControl.Resources>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="5"/>
+            <ColumnDefinition Width="1*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="5"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="5"/>
+            <RowDefinition Height="50"/>
+        </Grid.RowDefinitions>
+        <ListView Grid.Column="0" Grid.Row="2" ItemsSource="{Binding Path=SessionList}" SelectedItem="{Binding Path=SelectedSession}">
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListBoxItem">
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                    <Setter Property="Background" Value="{Binding Path=Status, Converter={StaticResource ResourceKey=StatusToColor}}"/>
+                </Style>
+            </ListView.ItemContainerStyle>
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Width="120" DisplayMemberBinding="{Binding Path=Start, Converter={StaticResource DTConv}}" Header="Начало сессии"/>
+                    <GridViewColumn Width="auto" DisplayMemberBinding="{Binding Path=Proto}">Протокол</GridViewColumn>
+                    <GridViewColumn Width="auto" DisplayMemberBinding="{Binding Path=Direction, Converter={StaticResource Transl}}">Направление</GridViewColumn>
+                    <GridViewColumn Width="230" DisplayMemberBinding="{Binding Path=From}" Header="От"/>
+                    <GridViewColumn Width="230" DisplayMemberBinding="{Binding Path=Subject}" Header="Тема письма"/>
+                    <GridViewColumn Width="auto" DisplayMemberBinding="{Binding Path=Status, Converter={StaticResource Transl}}">Состояние</GridViewColumn>
+                </GridView>
+            </ListView.View>
+        </ListView>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="150"/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="Поиск:" VerticalAlignment="Center" Margin="2,0,2,0"/>
+            <TextBox Grid.Column="1" Height="20" Text="{Binding Path=SearchString, UpdateSourceTrigger=PropertyChanged}"
+                         IsEnabled="{Binding Path=SearchTableEnable}"/>
+        </Grid>
+        <Grid Grid.Column="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBox Height="20" VerticalAlignment="Center"
+                     Text="{Binding Path=DirectoryForSearch, UpdateSourceTrigger=PropertyChanged}"/>
+            <TextBlock Grid.Column="1" Height="20" VerticalAlignment="Center" HorizontalAlignment="Right" Text=" Доступные файлы: "/>
+            <ComboBox Grid.Column="2" Margin="3,0,5,0" Height="20" ItemsSource="{Binding FileList}" SelectedItem="{Binding SelecteFileForRead, Mode=OneWay}">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal">
+                            <CheckBox IsChecked="{Binding Enable}"/>
+                            <TextBlock Text="{Binding FilePath, Converter={StaticResource FileNameConverter}}"/>
+                        </StackPanel>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+            <Button Grid.Column="3" Height="20" Content="Читать логи" Command="{Binding Path=ReadLogs}"/>
+        </Grid>
+        <myControl:SelectionBindingTextBox Grid.Column="2" Grid.Row="2" IsReadOnly="True" VerticalAlignment="Stretch" VerticalScrollBarVisibility="Auto"
+                 Text="{Binding Path=SelectedSessionLog}"
+                 BindableSelectionStart="{Binding StartCursorSelectionSelectedLog}"
+                 BindableSelectionLength="{Binding LengthSelectionSelectedLog}"/>
+        <Grid Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="5"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid Grid.Column="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition Width="220"/>
+                    <ColumnDefinition Width="120"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="17"/>
+                    <RowDefinition Height="17"/>
+                    <RowDefinition Height="17"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <ProgressBar Margin="4"
+                         Minimum="{Binding Path=MinValProgressBar}"
+                         Maximum="{Binding Path=CountFile}"
+                         Value="{Binding Path=CurrentFile}"/>
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <TextBlock Text="Файлов "/>
+                    <TextBlock Text="{Binding Path=CurrentFile}"/>
+                    <TextBlock Text=" из "/>
+                    <TextBlock Margin="0,0,6,0" Text="{Binding Path=CountFile}"/>
+                </StackPanel>
+
+                <StackPanel Grid.Row="2" Grid.Column="2" Orientation="Horizontal">
+                    <TextBlock Text="Всего сессий: "/>
+                    <TextBlock Text="{Binding Path=AllSession}"/>
+                </StackPanel>
+
+                <ProgressBar Grid.Row="1" Margin="4"
+                         Minimum="{Binding Path=MinValProgressBar}"
+                         Maximum="{Binding Path=AllSession}"
+                         Value="{Binding Path=InputSession}"/>
+                <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal">
+                    <TextBlock Text="входящих - "/>
+                    <TextBlock Text="{Binding Path=InputSession}"/>
+                    <TextBlock Text=" , исходящих - "/>
+                    <TextBlock Text="{Binding Path=OutputSession}"/>
+                    <TextBlock Text=" . "/>
+                </StackPanel>
+
+                <ProgressBar Grid.Row="2" Grid.Column="0" Margin="4"
+                         Minimum="{Binding Path=MinValProgressBar}"
+                         Maximum="{Binding Path=AllSession}"
+                         Value="{Binding Path=SuccessSession}"/>
+                <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal">
+                    <TextBlock Text="успех - "/>
+                    <TextBlock Text="{Binding Path=SuccessSession}"/>
+                    <TextBlock Text=" , провал - "/>
+                    <TextBlock Text="{Binding Path=TerminatedSession}"/>
+                    <TextBlock Text=" . "/>
+                </StackPanel>
+            </Grid>
+            <TextBox Grid.Column="2" VerticalScrollBarVisibility="Auto" IsReadOnly="True" Text="{Binding LogText}"/>
+        </Grid>
+        <GridSplitter Height="5" HorizontalAlignment="Stretch" Grid.Row="1" Grid.ColumnSpan="3" IsEnabled="False"/>
+        <GridSplitter Grid.Row="1" Grid.RowSpan="4" Grid.Column="1" Width="5" IsEnabled="False"/>
+        <GridSplitter Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3" HorizontalAlignment="Stretch" Height="5" IsEnabled="False"/>
+    </Grid>
+</UserControl>

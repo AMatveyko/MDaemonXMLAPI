@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Net;
 using System.IO;
+using System.Windows;
 
 namespace MDaemonXMLAPI.Model
 {
@@ -19,12 +20,21 @@ namespace MDaemonXMLAPI.Model
             request.Credentials = new NetworkCredential(userName, password);
 
             byte[] bytes;
-            bytes = System.Text.Encoding.ASCII.GetBytes(requestXml);
+            bytes = System.Text.Encoding.UTF8.GetBytes( requestXml );
             request.ContentType = "text/xml; encoding='utf-8'";
             request.ContentLength = bytes.Length;
             request.Method = "POST";
             request.ServerCertificateValidationCallback = delegate { return true; };
-            Stream requestStream = request.GetRequestStream();
+            Stream requestStream;
+            try
+            {
+                requestStream = request.GetRequestStream();
+            }
+            catch (Exception e)
+            {
+                System.Windows.MessageBox.Show($"{host}: {e.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                return string.Empty;
+            }
             requestStream.Write(bytes, 0, bytes.Length);
             requestStream.Close();
             string responseStr = String.Empty;
@@ -49,5 +59,6 @@ namespace MDaemonXMLAPI.Model
 
             return responseStr;
         }
+
     }
 }

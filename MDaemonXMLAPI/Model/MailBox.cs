@@ -65,6 +65,7 @@ namespace MDaemonXMLAPI.Model
                 OnPropertyChanged(nameof(Frozen));
             }
         }
+
         private string _disabled;
         public string Disabled
         {
@@ -114,16 +115,14 @@ namespace MDaemonXMLAPI.Model
             }
         }
 
-        public MailBox(string name, string domain, string password="", string username = "", string usersurname = "")
+        public MailBox(string name, string domain, string password="", string username = "", string userSurname = "")
         {
             Name = name;
             Domain = domain;
             Password = password;
             FirstName = (username == "")? name : username;
-            LastName = usersurname;
+            LastName = userSurname;
             IsEdit = true;
-            _frozen = "No";
-            _disabled = "No";
             _descriptions = "";
         }
 

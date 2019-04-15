@@ -75,9 +75,34 @@ namespace MDaemonXMLAPI.Model.Xml
                     }
                 }
             }
-
-
             return userList;
+        }
+        public static string GetServerVersion(string xmlResponse)
+        {
+            XmlDocument xmlDocument = new XmlDocument();
+            xmlDocument.LoadXml(xmlResponse);
+            XmlNodeList xmlNodeList = xmlDocument.GetElementsByTagName("ProductVersion");
+            if (xmlNodeList.Count > 0)
+                return xmlNodeList[0].InnerText;
+            return "err";
+        }
+        public static string GetServerUptime(string xmlResponse)
+        {
+            XmlDocument xmlDocument = new XmlDocument();
+            xmlDocument.LoadXml(xmlResponse);
+            XmlNodeList xmlNodeList = xmlDocument.GetElementsByTagName("Uptime");
+            if (xmlNodeList.Count > 0)
+                return xmlNodeList[0].InnerText;
+            return "err";
+        }
+        public static string GetServerName(string xmlResponse)
+        {
+            XmlDocument xmlDocument = new XmlDocument();
+            xmlDocument.LoadXml(xmlResponse);
+            XmlNodeList xmlNodeList = xmlDocument.GetElementsByTagName("SERVER_NAME");
+            if (xmlNodeList.Count > 0)
+                return xmlNodeList[0].InnerText;
+            return "err";
         }
         public static List<string> GetDomainList(string xmlResponse, IForLogging viewModel)
         {

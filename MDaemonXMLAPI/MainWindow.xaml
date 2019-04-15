@@ -4,11 +4,48 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MDaemonXMLAPI"
+        xmlns:logAnal="clr-namespace:MDaemonXMLAPI.UserControls.UserControls.LogAnalyzer"
+        xmlns:converters="clr-namespace:MDaemonXMLAPI.Converters"
         mc:Ignorable="d"
-        Title="MDaemonXMLAPI - Создание пользователей" Height="600" Width="1040" MinHeight="600" MinWidth="1040">
+        Title="MDaemonXMLAPI - Создание пользователей" Height="600" Width="1040" MinHeight="600" MinWidth="1240">
     <Window.DataContext>
         <local:ViewModel/>
     </Window.DataContext>
+    <Window.Resources>
+        <converters:YesNoToBoolConverter x:Key="NoToBoolConverter"/>
+        <converters:FrozenDisableToColorConverter x:Key="FrozenDisableToColorConverter"/>
+
+        <Style x:Key="Style1">
+            <Setter Property="Control.Margin" Value="3"/>
+            <Setter Property="Control.VerticalAlignment" Value="Bottom"/>
+        </Style>
+        <Style x:Key="Style2">
+            <Setter Property="Control.VerticalAlignment" Value="Bottom"/>
+        </Style>
+        <DataTemplate x:Key="BoxName">
+            <TextBox Text="{Binding Path=Name}" MinWidth="120" TextWrapping="WrapWithOverflow" Background="White"/>
+        </DataTemplate>
+        <DataTemplate x:Key="Domen">
+            <ComboBox ItemsSource="{Binding ElementName=CBDomains, Path=ItemsSource}" SelectedItem="{Binding Path=Domain}" MinWidth="120"/>
+        </DataTemplate>
+        <DataTemplate x:Key="Password">
+            <TextBox Text="{Binding Path=Password}" MinWidth="120" Background="White"/>
+        </DataTemplate>
+        <DataTemplate x:Key="FirstName">
+            <TextBox Text="{Binding Path=FirstName}" MinWidth="120" Background="White"/>
+        </DataTemplate>
+        <DataTemplate x:Key="LastName">
+            <TextBox Text="{Binding Path=LastName}" MinWidth="120" HorizontalAlignment="Stretch" Background="White"/>
+        </DataTemplate>
+        <DataTemplate x:Key="Description">
+            <TextBox Text="{Binding Path=Descriptions}" MinWidth="120" HorizontalAlignment="Stretch" Background="White"/>
+        </DataTemplate>
+        <DataTemplate x:Key="DeleteBut">
+            <Button Grid.Column="6" Margin="3" Content="Удалить" HorizontalAlignment="Right"
+                    Command="{Binding Path=DataContext.RemoveItemCmd, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                    CommandParameter="{Binding ElementName=GridItem, Path=DataContext}"/>
+        </DataTemplate>
+    </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="30"/>
@@ -30,7 +67,7 @@
             </Border>
             <TextBlock VerticalAlignment="Center" Text=" Пароль: "/>
             <Border>
-                <PasswordBox Name="pswdBx" VerticalAlignment="Center" Width="100" Password="19860809"/>
+                <PasswordBox Name="pswdBx" VerticalAlignment="Center" Width="100" Password="1"/>
             </Border>
             <Separator/>
             <Button Margin="2" VerticalAlignment="Bottom"
@@ -39,7 +76,7 @@
                                         CommandParameter="{Binding ElementName=pswdBx}"/>
         </ToolBar>
         <TabControl Grid.Row="1">
-            <TabItem Header="Создание пользователей">
+            <TabItem Header="Создание ящиков">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="4*"/>
@@ -66,15 +103,15 @@
                                     </Grid.ColumnDefinitions>
                                     <StackPanel Grid.Column="0">
                                         <TextBlock Margin="1" Text="Имя ящика:"/>
-                                        <TextBox Margin="3" Text="{Binding Path=Name}" MinWidth="120" TextWrapping="WrapWithOverflow" Background="White"/>
+                                        <TextBox Margin="3" FontWeight="Bold" FontSize="16" Text="{Binding Path=Name}" MinWidth="120" TextWrapping="WrapWithOverflow" Background="White"/>
                                     </StackPanel>
                                     <StackPanel Grid.Column="1">
                                         <TextBlock Margin="1" Text="Домен:"/>
-                                        <ComboBox Margin="3" ItemsSource="{Binding ElementName=CBDomains, Path=ItemsSource}" SelectedItem="{Binding Path=Domain}" MinWidth="120"/>
+                                        <ComboBox Margin="3" FontWeight="Bold" FontSize="16" ItemsSource="{Binding ElementName=CBDomains, Path=ItemsSource}" SelectedItem="{Binding Path=Domain}" MinWidth="120"/>
                                     </StackPanel>
                                     <StackPanel Grid.Column="2">
                                         <TextBlock Margin="1" Text="Пароль:"/>
-                                        <TextBox Margin="3" Text="{Binding Path=Password}" MinWidth="120" Background="White"/>
+                                        <TextBox Margin="3" FontWeight="Bold" FontSize="16" Text="{Binding Path=Password}" MinWidth="120" Background="White"/>
                                     </StackPanel>
                                     <StackPanel Grid.Column="3">
                                         <TextBlock Margin="1" Text="Имя:"/>
@@ -235,7 +272,7 @@
                     </Grid>
                 </Grid>
             </TabItem>
-            <TabItem Header="Информация о пользователях">
+            <TabItem Header="Список ящиков">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="55"/>
@@ -253,26 +290,36 @@
                             <TextBlock Text=" *@ " VerticalAlignment="Bottom"/>
                             <ComboBox Width="200" ItemsSource="{Binding Path=DomainListInfoUsers}"
                                                   SelectedItem="{Binding Path=SelectedDomainInfoUser}"/>
+                            <TextBlock Text="  Подходящих ящиков:  " VerticalAlignment="Bottom"/>
+                            <TextBlock Text="{Binding Path=FilteredBoxes}" VerticalAlignment="Bottom"/>
                         </StackPanel>
                     </GroupBox>
                     <GroupBox Grid.Row="1" Grid.Column="0" Header="Почтовые ящики">
-                        <ListBox BorderThickness="0" ItemsSource="{Binding Path=FilteredAllMailBox}"
-                                                      SelectedItem="{Binding Path=SelectedMailBox}">
-                            <ListBox.ItemContainerStyle>
+                        <ListView ItemsSource="{Binding Path=FilteredAllMailBox}"
+                                  SelectedItem="{Binding Path=SelectedMailBox}">
+                            <ListView.ItemContainerStyle>
                                 <Style TargetType="ListBoxItem">
-                                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                    <Setter Property="HorizontalAlignment" Value="Stretch"/>
+                                    <Setter Property="Background">
+                                        <Setter.Value>
+                                            <MultiBinding Converter="{StaticResource FrozenDisableToColorConverter}">
+                                                <Binding Path="Frozen"/>
+                                                <Binding Path="Disabled"/>
+                                            </MultiBinding>
+                                        </Setter.Value>
+                                    </Setter>
                                 </Style>
-                            </ListBox.ItemContainerStyle>
-                            <ListBox.ItemTemplate>
-                                <DataTemplate>
-                                    <StackPanel Orientation="Horizontal" Background="LightGray">
-                                        <TextBlock Margin="4,1,0,1" Text="{Binding Path=Name}" FontWeight="Bold" FontSize="16"/>
-                                        <TextBlock Text="@"  FontWeight="Bold"  FontSize="16"/>
-                                        <TextBlock Text="{Binding Path=Domain}"  FontWeight="Bold"  FontSize="16"/>
-                                    </StackPanel>
-                                </DataTemplate>
-                            </ListBox.ItemTemplate>
-                        </ListBox>
+                            </ListView.ItemContainerStyle>
+                            <ListView.View>
+                                <GridView>
+                                    <GridViewColumn Width="auto" DisplayMemberBinding="{Binding Path=Email}">Ящик</GridViewColumn>
+                                    <GridViewColumn Width="100" DisplayMemberBinding="{Binding Path=FirstName}">Имя</GridViewColumn>
+                                    <GridViewColumn Width="100" DisplayMemberBinding="{Binding Path=LastName}">Ф.О.</GridViewColumn>
+                                    <GridViewColumn Width="auto" DisplayMemberBinding="{Binding Path=Frozen}">Заморожен</GridViewColumn>
+                                    <GridViewColumn Width="auto" DisplayMemberBinding="{Binding Path=Disabled}">Выключен</GridViewColumn>
+                                </GridView>
+                            </ListView.View>
+                        </ListView>
                     </GroupBox>
                     <GroupBox Grid.Row="1" Grid.Column="2" Header="{Binding Path=Email}" DataContext="{Binding Path=SelectedMailBox}" FontWeight="Bold" FontSize="16">
                         <Grid>
@@ -289,34 +336,62 @@
                                 <RowDefinition Height="30"/>
                                 <RowDefinition Height="30"/>
                                 <RowDefinition Height="30"/>
+                                <RowDefinition Height="30"/>
+                                <RowDefinition Height="30"/>
+                                <RowDefinition Height="30"/>
+                                <RowDefinition Height="30"/>
                             </Grid.RowDefinitions>
-                            <TextBlock Text="Имя:"/>
-                            <TextBox Grid.Column="1" Text="{Binding FirstName}" BorderThickness="0"
+                            <TextBlock Grid.Row="0" Text="Ящик:" Style="{StaticResource Style1}"/>
+                            <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Email, Mode=OneWay}" Style="{StaticResource Style1}" BorderThickness="0"
+                                     IsReadOnly="True" Grid.ColumnSpan="2" Width="auto" HorizontalAlignment="Left"/>
+                            <TextBlock Grid.Row="1" Text="Имя:" Style="{StaticResource Style1}"/>
+                            <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding FirstName}" Style="{StaticResource Style1}"
                                      IsReadOnly="{Binding DataContext.IsReadUserInfo, RelativeSource={RelativeSource AncestorType=ItemsControl}}"/>
-                            <TextBlock Grid.Row="1" Text="Фамилия:"/>
-                            <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding LastName}" BorderThickness="0"
+                            <TextBlock Grid.Row="2" Text="Фамилия:" Style="{StaticResource Style1}"/>
+                            <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding LastName}" Style="{StaticResource Style1}"
                                      IsReadOnly="{Binding DataContext.IsReadUserInfo, RelativeSource={RelativeSource AncestorType=ItemsControl}}"/>
-                            <TextBlock Grid.Row="2" Text="Пароль:"/>
-                            <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Password}" BorderThickness="0"
+                            <TextBlock Grid.Row="3" Text="Пароль:" Style="{StaticResource Style1}"/>
+                            <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Password}" Style="{StaticResource Style1}" 
                                      IsReadOnly="{Binding DataContext.IsReadUserInfo, RelativeSource={RelativeSource AncestorType=ItemsControl}}"/>
-                            <TextBlock Grid.Row="3" Text="Заморожен:"/>
-                            <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Frozen}" BorderThickness="0"
+                            <Button Grid.Row="3" Grid.Column="2" Margin="3" Content="Генерировать новый" HorizontalAlignment="Left"
+                                    Command="{Binding Path=DataContext.GenNewPwdCmd, RelativeSource={RelativeSource AncestorType=ItemsControl}}"/>
+                            <TextBlock Grid.Row="4" Text="Заморожен:" Style="{StaticResource Style1}"/>
+                            <CheckBox Grid.Row="4" Grid.Column="1" IsChecked="{Binding Frozen, Converter={StaticResource NoToBoolConverter}}" Style="{StaticResource Style1}"
+                                       IsEnabled="{Binding DataContext.IsReadUserInfo, RelativeSource={RelativeSource AncestorType=ItemsControl}}"/>
+                                <TextBlock Grid.Row="5" Text="Выключен:" Style="{StaticResource Style1}"/>
+                            <CheckBox Grid.Row="5" Grid.Column="1" IsChecked="{Binding Disabled, Converter={StaticResource NoToBoolConverter}}" Style="{StaticResource Style1}"
+                                      IsEnabled="{Binding DataContext.IsReadUserInfo, RelativeSource={RelativeSource AncestorType=ItemsControl}}"/>
+                            <TextBlock Grid.Row="6" Text="Директория:" Style="{StaticResource Style1}"/>
+                            <TextBox Grid.Row="6" Grid.Column="1" Text="{Binding MailDir}" Grid.ColumnSpan="2" Style="{StaticResource Style1}"
+                                     IsReadOnly="True" BorderThickness="0"/>
+                            <TextBlock Grid.Row="7" Text="Описание:" Style="{StaticResource Style1}"/>
+                            <TextBox Grid.Row="7" Grid.Column="1" Text="{Binding Descriptions}" Grid.ColumnSpan="2" Style="{StaticResource Style1}"
                                      IsReadOnly="{Binding DataContext.IsReadUserInfo, RelativeSource={RelativeSource AncestorType=ItemsControl}}"/>
-                            <TextBlock Grid.Row="4" Text="Выключен:"/>
-                            <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding Disabled}" BorderThickness="0"
-                                     IsReadOnly="{Binding DataContext.IsReadUserInfo, RelativeSource={RelativeSource AncestorType=ItemsControl}}"/>
-                            <TextBlock Grid.Row="5" Text="Директория:"/>
-                            <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding MailDir}" Grid.ColumnSpan="2" BorderThickness="0"
-                                     IsReadOnly="{Binding DataContext.IsReadUserInfo, RelativeSource={RelativeSource AncestorType=ItemsControl}}"/>
-                            <TextBlock Grid.Row="6" Text="Описание:"/>
-                            <TextBox Grid.Row="6" Grid.Column="1" Text="{Binding Descriptions}" Grid.ColumnSpan="2" BorderThickness="0"
-                                     IsReadOnly="{Binding DataContext.IsReadUserInfo, RelativeSource={RelativeSource AncestorType=ItemsControl}}"/>
+                            <Button Grid.Row="8" Margin="3" Content="Обновить на сервере"
+                                    Command="{Binding Path=DataContext.UpdUserOnSrvCmd, RelativeSource={RelativeSource AncestorType=ItemsControl}}"/>
                         </Grid>
                     </GroupBox>
                 </Grid>
             </TabItem>
+            <TabItem Header="Анализатор журналов" IsSelected="True">
+                <logAnal:LogAnalyzerControl/>
+            </TabItem>
         </TabControl>
         <StatusBar Grid.Row="2">
+            <TextBlock Text="Имя сервера:"/>
+            <TextBlock Text="{Binding Path=ServerName}"/>
+            <Separator/>
+            <TextBlock Text="Версия:"/>
+            <TextBlock Text="{Binding Path=ServerVersion}"/>
+            <Separator/>
+            <TextBlock Text="Время работы:"/>
+            <TextBlock Text="{Binding Path=ServerUptime}"/>
+            <Separator/>
+            <TextBlock Text="Количесто доменнов:"/>
+            <TextBlock Text="{Binding Path=TotalDomains}"/>
+            <Separator/>
+            <TextBlock Text="Всего почтовых ящиков:"/>
+            <TextBlock Text="{Binding Path=TotalMailBoxes}"/>
         </StatusBar>
     </Grid>
 </Window>

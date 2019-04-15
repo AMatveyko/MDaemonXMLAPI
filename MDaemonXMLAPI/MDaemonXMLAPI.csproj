@@ -34,8 +34,32 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>MDaemonXMLAPI.ico</ApplicationIcon>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.configuration" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
@@ -55,6 +79,8 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Cmd\UpdUserOnSrvCmd.cs" />
+    <Compile Include="Cmd\GenNewPwdCmd.cs" />
     <Compile Include="Cmd\WriteListToFileCmd.cs" />
     <Compile Include="Cmd\AddNewBoxCmd.cs" />
     <Compile Include="Cmd\CheckLoginCmd.cs" />
@@ -63,7 +89,10 @@
     <Compile Include="Cmd\GenNewBoxesCmd.cs" />
     <Compile Include="Cmd\RemoveItemCmd.cs" />
     <Compile Include="Cmd\WriteListOnServerCmd.cs" />
+    <Compile Include="Converters\FrozenDisableToColorConverter.cs" />
+    <Compile Include="Converters\YesNoToBoolConverter.cs" />
     <Compile Include="Model\ApiClient.cs" />
+    <Compile Include="Model\AppConfig.cs" />
     <Compile Include="Model\Checks.cs" />
     <Compile Include="Model\IForLogging.cs" />
     <Compile Include="Model\MailBox.cs" />
@@ -71,10 +100,24 @@
     <Compile Include="Model\Xml\XmlCreateUserReq.cs" />
     <Compile Include="Model\Xml\XmlGetDomainInfoReq.cs" />
     <Compile Include="Model\Xml\XmlGetDomainListReq.cs" />
+    <Compile Include="Model\Xml\XmlUpdUserReq.cs" />
     <Compile Include="Model\Xml\XmlGetUserInfoReq.cs" />
     <Compile Include="Model\Xml\XmlRequestsBase.cs" />
     <Compile Include="Model\Xml\XmlResponse.cs" />
+    <Compile Include="MyProps\SelectionBindingTextBox.cs" />
+    <Compile Include="UserControls\LogAnalyzer\Commands\ReadLogsCmd.cs" />
+    <Compile Include="UserControls\LogAnalyzer\Converters\DataTimeConverter.cs" />
+    <Compile Include="UserControls\LogAnalyzer\Converters\FileNameConverter.cs" />
+    <Compile Include="UserControls\LogAnalyzer\Converters\StatusToColorConverter.cs" />
+    <Compile Include="UserControls\LogAnalyzer\Converters\TranslateConverter.cs" />
+    <Compile Include="UserControls\LogAnalyzer\LogAnalyzerControl.xaml.cs">
+      <DependentUpon>LogAnalyzerControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\LogAnalyzer\ViewModelLogAnalyzer.cs" />
+    <Compile Include="UserControls\LogAnalyzer\ViewModelLogAnalyzerCmd.cs" />
     <Compile Include="ViewModel.cs" />
+    <Compile Include="UserControls\LogAnalyzer\ViewModelLogAnalyzerINotify.cs" />
+    <Compile Include="UserControls\LogAnalyzer\ViewModelLogAnalyzerProps.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -87,6 +130,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="UserControls\LogAnalyzer\LogAnalyzerControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">
@@ -114,5 +161,19 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="MDaemonXMLAPI.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\LogAnalalyzer.Bl\LogAnalyzer.Bl.csproj">
+      <Project>{39fe07fe-c86a-483f-a1f3-59b87f7bccdd}</Project>
+      <Name>LogAnalyzer.Bl</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\LogAnalyzer.Data\LogAnalyzer.Data.csproj">
+      <Project>{67a62b77-0ef7-4ea7-ae1a-12bcdac53a10}</Project>
+      <Name>LogAnalyzer.Data</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

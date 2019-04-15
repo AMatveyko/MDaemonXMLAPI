@@ -12,7 +12,7 @@ using System.Windows.Controls;
 
 namespace MDaemonXMLAPI
 {
-    public class ViewModel : INotifyPropertyChanged, IForLogging
+    public partial class ViewModel : INotifyPropertyChanged, IForLogging
     {
 
         #region INotifyPropertyChanged
@@ -26,11 +26,6 @@ namespace MDaemonXMLAPI
         #endregion
 
         #region View
-
-
-        /// <summary>
-        /// new string
-        /// </summary>
 
         public PasswordBox PasswordBox { get; set; }
 
@@ -144,9 +139,11 @@ namespace MDaemonXMLAPI
             }
             set
             {
-                MDaemonXMLAPI.Model.Xml.XmlResponse.FillingUserInfoAsync(value, this);
                 _selectedMailBox = value;
                 OnPropertyChanged(nameof(SelectedMailBox));
+                MDaemonXMLAPI.Model.Xml.XmlResponse.FillingUserInfoAsync(value, this);
+                GenNewPwdCmd.RaiseCanExecuteChanged();
+                UpdUserOnSrvCmd.RaiseCanExecuteChanged();
             }
         }
 
@@ -187,6 +184,73 @@ namespace MDaemonXMLAPI
         public bool SpecSimvoly { get; set; }
         public string CreateNewPasswordLength { get; set; }
 
+        private string _serverName;
+
+        public string ServerName
+        {
+            get => _serverName;
+            set
+            {
+                _serverName = value;
+                OnPropertyChanged(nameof(ServerName));
+            }
+        }
+        private string _serverVersion;
+        public string ServerVersion
+        {
+            get => _serverVersion;
+            set
+            {
+                _serverVersion = value;
+                OnPropertyChanged(nameof(ServerVersion));
+            }
+        }
+
+        private string _serverUptime;
+        public string ServerUptime
+        {
+            get => _serverUptime;
+            set
+            {
+                _serverUptime = value;
+                OnPropertyChanged(nameof(ServerUptime));
+            }
+        }
+
+        private int _totalDomains;
+        public int TotalDomains
+        {
+            get => _totalDomains;
+            set
+            {
+                _totalDomains = value;
+                OnPropertyChanged(nameof(TotalDomains));
+            }
+        }
+
+        private int _totalMailBoxes;
+        public int TotalMailBoxes
+        {
+            get => _totalMailBoxes;
+            set
+            {
+                _totalMailBoxes = value;
+                OnPropertyChanged(nameof(TotalMailBoxes));
+            }
+        }
+
+        private int _filteredBoxes;
+
+        public int FilteredBoxes
+        {
+            get => _filteredBoxes;
+            set
+            {
+                _filteredBoxes = value;
+                OnPropertyChanged(nameof(FilteredBoxes));
+            }
+        }
+
         #region Cmd
         private CheckLoginCmd _checkLoginCmd;
         public CheckLoginCmd CheckLoginCmd { get => _checkLoginCmd ?? (_checkLoginCmd = new CheckLoginCmd(this)); }
@@ -202,24 +266,34 @@ namespace MDaemonXMLAPI
         public WriteListOnServerCmd WriteListOnServerCmd { get => _writeListOnServerCmd ?? (_writeListOnServerCmd = new WriteListOnServerCmd(this)); }
         private WriteListToFileCmd _writeNewMailBoxToFileCmd;
         public WriteListToFileCmd WriteNewMailBoxToFileCmd { get => _writeNewMailBoxToFileCmd ?? (_writeNewMailBoxToFileCmd = new WriteListToFileCmd(this)); }
+        private GenNewPwdCmd _genNewPwdCmd;
+        public GenNewPwdCmd GenNewPwdCmd { get => _genNewPwdCmd ?? (_genNewPwdCmd = new GenNewPwdCmd(this)); }
+        private UpdUserOnSrvCmd _updUserOnSrvCmd;
+        public UpdUserOnSrvCmd UpdUserOnSrvCmd { get => _updUserOnSrvCmd ?? (_updUserOnSrvCmd = new UpdUserOnSrvCmd(this)); }
         #endregion
 
         #endregion
 
         public ViewModel()
         {
-            MailServer = "91.226.133.9";
-            UserNameForMailServer = "userForApiTest@bg-corp.net";
+            MailServer = AppConfig.ReadHost();
+            UserNameForMailServer = AppConfig.ReadUserName();
             UserNameTemplate = "mailBox";
             MailBoxesCount = "10";
             _passwordLength = "10";
             SpecSimvoly = true;
             _selectedDomainInfoUser = "*";
             _allMailBox = new ObservableCollection<MailBox>();
-            IsReadUserInfo = false;
+            IsReadUserInfo = true;
             AllMailBox.CollectionChanged += FilteringAllMailBox;
             FilterNameAllMailBox = "";
             CreateNewPasswordLength = "10";
+            ServerName = "-";
+            ServerVersion = "-";
+            ServerUptime = "-";
+            TotalDomains = 0;
+            TotalMailBoxes = 0;
+            FilteredBoxes = 0;
         }
 
         public void Logging(string str)
@@ -256,6 +330,8 @@ namespace MDaemonXMLAPI
             {
                 FilteredAllMailBox.Add(mailBox);
             }
+
+            FilteredBoxes = FilteredAllMailBox.Count;
         }
     }
 }
